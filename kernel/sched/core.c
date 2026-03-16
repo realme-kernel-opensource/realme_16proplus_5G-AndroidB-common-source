@@ -4899,14 +4899,12 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 		 */
 		p->sched_reset_on_fork = 0;
 	}
-
 	if (dl_prio(p->prio))
 		return -EAGAIN;
 	else if (rt_prio(p->prio))
 		p->sched_class = &rt_sched_class;
 	else
 		p->sched_class = &fair_sched_class;
-
 	init_entity_runnable_average(&p->se);
 	trace_android_rvh_finish_prio_fork(p);
 
@@ -5828,10 +5826,9 @@ void scheduler_tick(void)
 		wq_worker_tick(curr);
 
 #ifdef CONFIG_SMP
-	rq->idle_balance = idle_cpu(cpu);
-	trigger_load_balance(rq);
+		rq->idle_balance = idle_cpu(cpu);
+		trigger_load_balance(rq);
 #endif
-
 	trace_android_vh_scheduler_tick(rq);
 }
 
@@ -6135,6 +6132,7 @@ static void put_prev_task_balance(struct rq *rq, struct task_struct *prev,
 	 * a runnable task of @class priority or higher.
 	 */
 	for_class_range(class, prev->sched_class, &idle_sched_class) {
+
 		if (class->balance(rq, prev, rf))
 			break;
 	}
@@ -6211,6 +6209,7 @@ static inline struct task_struct *pick_task(struct rq *rq)
 	struct task_struct *p;
 
 	for_each_class(class) {
+
 		p = class->pick_task(rq);
 		if (p)
 			return p;
@@ -7955,6 +7954,7 @@ change:
 	if (unlikely(oldpolicy != -1 && oldpolicy != p->policy)) {
 		policy = oldpolicy = -1;
 		task_rq_unlock(rq, p, &rf);
+
 		if (cpuset_locked)
 			cpuset_unlock();
 		goto recheck;
@@ -8037,6 +8037,7 @@ change:
 
 unlock:
 	task_rq_unlock(rq, p, &rf);
+
 	if (cpuset_locked)
 		cpuset_unlock();
 	return retval;
@@ -8734,6 +8735,7 @@ static void do_sched_yield(void)
 	long skip = 0;
 
 	trace_android_rvh_before_do_sched_yield(&skip);
+
 	if (skip)
 		return;
 
@@ -9258,6 +9260,7 @@ SYSCALL_DEFINE1(sched_get_priority_max, int, policy)
 	case SCHED_NORMAL:
 	case SCHED_BATCH:
 	case SCHED_IDLE:
+
 		ret = 0;
 		break;
 	}
@@ -9285,6 +9288,7 @@ SYSCALL_DEFINE1(sched_get_priority_min, int, policy)
 	case SCHED_NORMAL:
 	case SCHED_BATCH:
 	case SCHED_IDLE:
+
 		ret = 0;
 	}
 	return ret;
@@ -10175,7 +10179,6 @@ void __init sched_init(void)
 #ifdef CONFIG_SMP
 	BUG_ON(&dl_sched_class != &stop_sched_class + 1);
 #endif
-
 	wait_bit_init();
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
@@ -10870,6 +10873,7 @@ static void cpu_cgroup_attach(struct cgroup_taskset *tset)
 	struct cgroup_subsys_state *css;
 
 	cgroup_taskset_for_each(task, css, tset)
+
 		sched_move_task(task);
 
 	trace_android_rvh_cpu_cgroup_attach(tset);
